@@ -1,8 +1,5 @@
 .App {
-  text-align: center;
-}
-
-.App-title {
-  font-size: 1.5em;
+  max-width: 30rem;
+  margin: 2em;
 }
 
