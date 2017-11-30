@@ -11,45 +11,54 @@ loadQuoteForStock('nflx')
 class App extends Component {
   state = {
     error: null,
+    enteredSymbol: 'NFLX',
     quote: null
-  }
+  };
 
   // The first time our component is rendered
   // this method is called
   componentDidMount() {
-    loadQuoteForStock('nflx')
-    .then((quote) => {
-      this.setState({ quote: quote })
-    })
-    .catch((error) => {
-      // If 404 found
-      if (error.response.status === 404) {
-        error = new Error('The stock symbol does not exist')
-      }
-      this.setState({ error: error })
-      console.error('Error loading quote: ', error)
+    loadQuoteForStock("nflx")
+      .then(quote => {
+        this.setState({ quote: quote });
+      })
+      .catch(error => {
+        // If 404 found
+        if (error.response.status === 404) {
+          error = new Error("The stock symbol does not exist");
+        }
+        this.setState({ error: error });
+        console.error("Error loading quote: ", error);
+      });
+  }
+  onChangeEnteredSymbol = (event) => {
+    const input = event.target
+    const rawValue = input.value
+    const value = rawValue.trim().toUpperCase()
+    this.setState({
+      enteredSymbol: value
     })
   }
 
   render() {
-    const { error, quote } = this.state // same as const quote = this.state.quote
+    const { error, enteredSymbol, quote } = this.state;
 
     return (
       <div className="App">
         <h1 className="App-title">Wolf of React</h1>
-        {
-          !!error && // conditional must be true to show
-          <p>{ error.message }</p>
-        }
-        {
-          !!quote ? (
-            <StockInfo
-              { ...quote }
-            />
-          ) : (
-            <p>Loading...</p>
-          )
-        }
+
+        <input
+          value={enteredSymbol}
+          placeholder="Symbol e.g. NFLX"
+          aria-label="Stock Symbol"
+          onChange={
+            this.onChangeEnteredSymbol
+          }
+        />
+
+        {!!error && <p>{error.message // conditional must be true to show
+          }</p>}
+        {!!quote ? <StockInfo {...quote} /> : <p>Loading...</p>}
       </div>
     );
   }
