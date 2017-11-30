@@ -29,3 +29,6 @@ button {
   text-transform: capitalize;
 }
 
+.recharts-text {
+  font-size: 0.75rem;
+}
