@@ -3,7 +3,12 @@ import './App.css';
 import StockInfo from './components/StockInfo'
 import Logo from './components/Logo'
 import SearchItem from './components/SearchItem'
-import { loadQuoteForStock, loadLogoForStock } from './api/iex'
+import NewsItem from './components/NewsItem';
+import {
+  loadQuoteForStock,
+  loadLogoForStock,
+  loadLastFiveNewsItems
+} from "./api/iex";
 
 loadQuoteForStock('nflx')
   .then((quote) => {
@@ -13,6 +18,11 @@ loadQuoteForStock('nflx')
 loadLogoForStock("nflx")
   .then((logo) => {
     console.log("Netflix: ", logo);
+})
+
+loadLastFiveNewsItems("nflx")
+  .then(news => {
+    console.log("News: ", news);
 });
 
 class App extends Component {
@@ -21,7 +31,16 @@ class App extends Component {
     enteredSymbol: "AAPL",
     quote: null,
     logo: null,
-    searchHistory: []
+    searchHistory: [],
+    newsItems: [
+      // {
+      //  dateTime: null,
+      //  headline: null,
+      //  source: null,
+      //  url: null,
+      //  summary: null
+      // }
+    ]
   };
 
   // The first time our component is rendered
@@ -40,14 +59,32 @@ class App extends Component {
   };
 
   loadQuote = () => {
-    const { enteredSymbol, searchHistory } = this.state;
+    const { enteredSymbol, searchHistory, newsItems } = this.state;
 
     loadQuoteForStock(enteredSymbol)
       .then(quote => {
         this.setState({
           quote: quote,
-          error: null,
-          searchHistory: searchHistory.concat([enteredSymbol])
+          searchHistory: searchHistory.concat([enteredSymbol]),
+          error: null
+        });
+      })
+      .catch(error => {
+        // If 404 found
+        if (error.response.status === 404) {
+          error = new Error(
+            `The stock symbol '${enteredSymbol}' does not exist`
+          );
+        }
+        this.setState({ error: error });
+        console.error("Error loading quote: ", error);
+      });
+
+    loadLastFiveNewsItems(enteredSymbol)
+      .then(newsItem => {
+        this.setState({
+          newsItems: newsItem,
+          error: null
         });
       })
       .catch(error => {
@@ -66,7 +103,6 @@ class App extends Component {
         this.setState({ logo: logo.url, error: null });
       })
       .catch(error => {
-        // If 404 found
         if (error.response.status === 404) {
           error = new Error(
             `The stock symbol '${enteredSymbol}' does not exist`
@@ -78,39 +114,42 @@ class App extends Component {
   };
 
   render() {
-    const { error, enteredSymbol, quote, logo, searchHistory } = this.state;
-    console.log(searchHistory);
-    return (
-      <div className="App">
+    const {
+      error,
+      enteredSymbol,
+      quote,
+      logo,
+      newsItems,
+      searchHistory
+    } = this.state;
+    console.log("News Items: ", newsItems);
+    return <div className="App">
         <h1 className="App-title">Wolf of React</h1>
         <h2>Quote</h2>
-        <input
-          value={enteredSymbol}
-          placeholder="Symbol e.g. NFLX"
-          aria-label="Stock Symbol"
-          onChange={this.onChangeEnteredSymbol}
-        />
+        <input value={enteredSymbol} placeholder="Symbol e.g. NFLX" aria-label="Stock Symbol" onChange={this.onChangeEnteredSymbol} />
         <button onClick={this.loadQuote}>Submit</button>
 
-        {!!error && (
-          <p>
-            {
-              error.message // conditional must be true to show
+        {!!error && <p>
+            {error.message // conditional must be true to show
             }
-          </p>
-        )}
+          </p>}
         {!!logo && <Logo logo={logo} />}
         {!!quote ? <StockInfo {...quote} /> : <p>Loading...</p>}
+        <h2>Latest News</h2>
+        <ol>
+          {!!newsItems.length >= 1 &&
+            newsItems.map(item => (
+              <NewsItem key={item.call} {...item} />
+            ))}
+        </ol>
         <h2>Search History</h2>
         <ol>
-          { !!searchHistory.length >= 1 &&
+          {!!searchHistory.length >= 1 &&
             searchHistory.map(item => (
-              <SearchItem key={item.call} item={item}/>
-            ))
-          }
+              <SearchItem key={item.call} item={item} />
+            ))}
         </ol>
-      </div>
-    );
+      </div>;
   }
 }
 
