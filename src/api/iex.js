@@ -15,7 +15,11 @@ export function loadLogoForStock(symbol) {
 }
 
 export function loadLastFiveNewsItems(symbol) {
-         return api
-           .get(`/stock/${symbol}/news/last/5`)
-           .then(res => res.data);
-       }
+  return api.get(`/stock/${symbol}/news/last/5`)
+    .then(res => res.data)
+}
+
+export function loadSixMonthChart(symbol) {
+  return api.get(`/stock/${symbol}/chart/1m`)
+    .then(res => res.data)
+}

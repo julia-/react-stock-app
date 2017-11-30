@@ -3,11 +3,13 @@ import './App.css';
 import StockInfo from './components/StockInfo'
 import Logo from './components/Logo'
 import SearchItem from './components/SearchItem'
-import NewsItem from './components/NewsItem';
+import NewsItem from './components/NewsItem'
+import { Table, TableRow } from './components/ChartTable'
 import {
   loadQuoteForStock,
   loadLogoForStock,
-  loadLastFiveNewsItems
+  loadLastFiveNewsItems,
+  loadSixMonthChart
 } from "./api/iex";
 
 loadQuoteForStock('nflx')
@@ -21,8 +23,13 @@ loadLogoForStock("nflx")
 })
 
 loadLastFiveNewsItems("nflx")
-  .then(news => {
+  .then((news) => {
     console.log("News: ", news);
+});
+
+loadSixMonthChart("nflx")
+  .then((chart) => {
+  console.log("Chart: ", chart);
 });
 
 class App extends Component {
@@ -32,15 +39,8 @@ class App extends Component {
     quote: null,
     logo: null,
     searchHistory: [],
-    newsItems: [
-      // {
-      //  dateTime: null,
-      //  headline: null,
-      //  source: null,
-      //  url: null,
-      //  summary: null
-      // }
-    ]
+    newsItems: [],
+    chartTable: []
   };
 
   // The first time our component is rendered
@@ -111,18 +111,23 @@ class App extends Component {
         this.setState({ error: error });
         console.error("Error loading quote: ", error);
       });
+
+      loadSixMonthChart(enteredSymbol)
+        .then(chartResult => {
+          this.setState({ chartTable: chartResult, error: null });
+        })
+        .catch(error => {
+          if (error.response.status === 404) {
+            error = new Error(`The stock symbol '${enteredSymbol}' does not exist`);
+          }
+          this.setState({ error: error });
+          console.error("Error loading quote: ", error);
+        });
   };
 
   render() {
-    const {
-      error,
-      enteredSymbol,
-      quote,
-      logo,
-      newsItems,
-      searchHistory
-    } = this.state;
-    console.log("News Items: ", newsItems);
+    const { error, enteredSymbol, quote, logo, newsItems, searchHistory, chartTable } = this.state;
+
     return <div className="App">
         <h1 className="App-title">Wolf of React</h1>
         <h2>Quote</h2>
@@ -138,10 +143,13 @@ class App extends Component {
         <h2>Latest News</h2>
         <ol>
           {!!newsItems.length >= 1 &&
-            newsItems.map(item => (
-              <NewsItem key={item.call} {...item} />
-            ))}
+            newsItems.map(item => <NewsItem key={item.call} {...item} />)}
         </ol>
+        <h2>Six Month Table</h2>
+        <Table>
+          {!!chartTable.length >= 1 &&
+            chartTable.map(row => <TableRow key={row.call} {...row} />)}
+        </Table>
         <h2>Search History</h2>
         <ol>
           {!!searchHistory.length >= 1 &&
