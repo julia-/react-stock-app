@@ -59,7 +59,7 @@ class App extends Component {
   };
 
   loadQuote = () => {
-    const { enteredSymbol, searchHistory, newsItems } = this.state;
+    const { enteredSymbol, searchHistory } = this.state;
 
     loadQuoteForStock(enteredSymbol)
       .then(quote => {
