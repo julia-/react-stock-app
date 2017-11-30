@@ -24,3 +24,8 @@ button {
   color: #ffffff;
 }
 
+.recharts-legend-item,
+.recharts-tooltip-item {
+  text-transform: capitalize;
+}
+

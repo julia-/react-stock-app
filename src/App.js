@@ -6,6 +6,15 @@ import SearchItem from './components/SearchItem'
 import NewsItem from './components/NewsItem'
 import { Table, TableRow } from './components/ChartTable'
 import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend
+} from 'recharts'
+import {
   loadQuoteForStock,
   loadLogoForStock,
   loadLastFiveNewsItems,
@@ -40,7 +49,7 @@ class App extends Component {
     logo: null,
     searchHistory: [],
     newsItems: [],
-    chartTable: []
+    chartResults: []
   };
 
   // The first time our component is rendered
@@ -114,7 +123,7 @@ class App extends Component {
 
       loadSixMonthChart(enteredSymbol)
         .then(chartResult => {
-          this.setState({ chartTable: chartResult, error: null });
+          this.setState({ chartResults: chartResult, error: null });
         })
         .catch(error => {
           if (error.response.status === 404) {
@@ -126,14 +135,13 @@ class App extends Component {
   };
 
   render() {
-    const { error, enteredSymbol, quote, logo, newsItems, searchHistory, chartTable } = this.state;
+    const { error, enteredSymbol, quote, logo, newsItems, searchHistory, chartResults } = this.state;
 
     return <div className="App">
         <h1 className="App-title">Wolf of React</h1>
         <h2>Quote</h2>
         <input value={enteredSymbol} placeholder="Symbol e.g. NFLX" aria-label="Stock Symbol" onChange={this.onChangeEnteredSymbol} />
         <button onClick={this.loadQuote}>Submit</button>
-
         {!!error && <p>
             {error.message // conditional must be true to show
             }
@@ -147,9 +155,21 @@ class App extends Component {
         </ol>
         <h2>Six Month Table</h2>
         <Table>
-          {!!chartTable.length >= 1 &&
-            chartTable.map(row => <TableRow key={row.call} {...row} />)}
+          {!!chartResults.length >= 1 &&
+            chartResults.map(row => <TableRow key={row.call} {...row} />)}
         </Table>
+        <h2>Chart</h2>
+        <LineChart width={1000} height={400} data={chartResults} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <XAxis dataKey="label" height={60} />
+          <YAxis />
+          <CartesianGrid strokeDasharray="3 3" />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="high" stroke="#DDA0DD" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="low" stroke="#b2ffc5" />
+          <Line type="monotone" dataKey="open" stroke="#FFDAB9" />
+          <Line type="monotone" dataKey="close" stroke="#B0E0E6" />
+        </LineChart>
         <h2>Search History</h2>
         <ol>
           {!!searchHistory.length >= 1 &&
