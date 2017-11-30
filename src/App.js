@@ -70,11 +70,14 @@ class App extends Component {
   loadQuote = () => {
     const { enteredSymbol, searchHistory } = this.state;
 
+    this.setState({
+      searchHistory: searchHistory.concat([enteredSymbol])
+    })
+
     loadQuoteForStock(enteredSymbol)
       .then(quote => {
         this.setState({
           quote: quote,
-          searchHistory: searchHistory.concat([enteredSymbol]),
           error: null
         });
       })
@@ -137,7 +140,8 @@ class App extends Component {
   render() {
     const { error, enteredSymbol, quote, logo, newsItems, searchHistory, chartResults } = this.state;
 
-    return <div className="App">
+    return (
+      <div className="App">
         <h1 className="App-title">Wolf of React</h1>
         <h2>Quote</h2>
         <input value={enteredSymbol} placeholder="Symbol e.g. NFLX" aria-label="Stock Symbol" onChange={this.onChangeEnteredSymbol} />
@@ -148,6 +152,7 @@ class App extends Component {
           </p>}
         {!!logo && <Logo logo={logo} />}
         {!!quote ? <StockInfo {...quote} /> : <p>Loading...</p>}
+
         <h2>Latest News</h2>
         <ol>
           {!!newsItems.length >= 1 &&
@@ -158,6 +163,7 @@ class App extends Component {
           {!!chartResults.length >= 1 &&
             chartResults.map(row => <TableRow key={row.call} {...row} />)}
         </Table>
+
         <h2>Chart</h2>
         <LineChart width={1000} height={400} data={chartResults} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <XAxis dataKey="label" height={60} />
@@ -170,14 +176,18 @@ class App extends Component {
           <Line type="monotone" dataKey="open" stroke="#FFDAB9" />
           <Line type="monotone" dataKey="close" stroke="#B0E0E6" />
         </LineChart>
+
         <h2>Search History</h2>
         <ol>
-          {!!searchHistory.length >= 1 &&
-            searchHistory.map(item => (
-              <SearchItem key={item.call} item={item} />
-            ))}
+          {
+            !!searchHistory.length >= 1 &&
+              searchHistory.map(item => (
+                <SearchItem key={item.call} item={item} />
+              ))
+          }
         </ol>
-      </div>;
+      </div>
+    )
   }
 }
 
