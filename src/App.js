@@ -10,6 +10,7 @@ loadQuoteForStock('nflx')
 
 class App extends Component {
   state = {
+    error: null,
     quote: null
   }
 
@@ -20,26 +21,30 @@ class App extends Component {
     .then((quote) => {
       this.setState({ quote: quote })
     })
-
+    .catch((error) => {
+      // If 404 found
+      if (error.response.status === 404) {
+        error = new Error('The stock symbol does not exist')
+      }
+      this.setState({ error: error })
+      console.error('Error loading quote: ', error)
+    })
   }
 
   render() {
-    const { quote } = this.state // same as const quote = this.state.quote
+    const { error, quote } = this.state // same as const quote = this.state.quote
 
     return (
       <div className="App">
         <h1 className="App-title">Wolf of React</h1>
         {
+          !!error && // conditional must be true to show
+          <p>{ error.message }</p>
+        }
+        {
           !!quote ? (
             <StockInfo
               { ...quote }
-              // symbol={quote.symbol}
-              // companyName={quote.companyName}
-              // primaryExchange={quote.primaryExchange}
-              // latestPrice={quote.latestPrice}
-              // latestSource={quote.latestSource}
-              // week52High={quote.week52High}
-              // week52Low={quote.week52Low}
             />
           ) : (
             <p>Loading...</p>
