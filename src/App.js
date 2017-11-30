@@ -11,26 +11,16 @@ loadQuoteForStock('nflx')
 class App extends Component {
   state = {
     error: null,
-    enteredSymbol: 'NFLX',
+    enteredSymbol: 'AAPL',
     quote: null
   };
 
   // The first time our component is rendered
   // this method is called
   componentDidMount() {
-    loadQuoteForStock("nflx")
-      .then(quote => {
-        this.setState({ quote: quote });
-      })
-      .catch(error => {
-        // If 404 found
-        if (error.response.status === 404) {
-          error = new Error("The stock symbol does not exist");
-        }
-        this.setState({ error: error });
-        console.error("Error loading quote: ", error);
-      });
+    this.loadQuote()
   }
+
   onChangeEnteredSymbol = (event) => {
     const input = event.target
     const rawValue = input.value
@@ -38,6 +28,26 @@ class App extends Component {
     this.setState({
       enteredSymbol: value
     })
+  }
+
+  loadQuote = () => {
+    const { enteredSymbol } = this.state
+
+    loadQuoteForStock(enteredSymbol)
+      .then((quote) => {
+        this.setState({
+          quote: quote,
+          error: null
+        });
+      })
+      .catch((error) => {
+        // If 404 found
+        if (error.response.status === 404) {
+          error = new Error(`The stock symbol '${ enteredSymbol }' does not exist`);
+        }
+        this.setState({ error: error });
+        console.error("Error loading quote: ", error);
+      });
   }
 
   render() {
@@ -55,6 +65,12 @@ class App extends Component {
             this.onChangeEnteredSymbol
           }
         />
+        <button
+          onClick={
+            this.loadQuote
+          }>
+          Submit
+        </button>
 
         {!!error && <p>{error.message // conditional must be true to show
           }</p>}
