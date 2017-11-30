@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import './App.css';
 import StockInfo from './components/StockInfo'
-import Logo from "./components/Logo";
+import Logo from './components/Logo'
+import SearchItem from './components/SearchItem'
 import { loadQuoteForStock, loadLogoForStock } from './api/iex'
 
 loadQuoteForStock('nflx')
@@ -17,84 +18,95 @@ loadLogoForStock("nflx")
 class App extends Component {
   state = {
     error: null,
-    enteredSymbol: 'AAPL',
+    enteredSymbol: "AAPL",
     quote: null,
-    logo: null
+    logo: null,
+    searchHistory: ["AAPL"]
   };
 
   // The first time our component is rendered
   // this method is called
   componentDidMount() {
-    this.loadQuote()
+    this.loadQuote();
   }
 
-  onChangeEnteredSymbol = (event) => {
-    const input = event.target
-    const rawValue = input.value
-    const value = rawValue.trim().toUpperCase()
+  onChangeEnteredSymbol = event => {
+    const input = event.target;
+    const rawValue = input.value;
+    const value = rawValue.trim().toUpperCase();
     this.setState({
       enteredSymbol: value
-    })
-  }
+    });
+  };
 
   loadQuote = () => {
-    const { enteredSymbol } = this.state
+    const { enteredSymbol, searchHistory } = this.state;
 
     loadQuoteForStock(enteredSymbol)
-      .then((quote) => {
+      .then(quote => {
         this.setState({
           quote: quote,
-          error: null
+          error: null,
+          searchHistory: searchHistory.concat([enteredSymbol])
         });
       })
-      .catch((error) => {
+      .catch(error => {
         // If 404 found
         if (error.response.status === 404) {
-          error = new Error(`The stock symbol '${ enteredSymbol }' does not exist`);
+          error = new Error(
+            `The stock symbol '${enteredSymbol}' does not exist`
+          );
         }
         this.setState({ error: error });
         console.error("Error loading quote: ", error);
       });
-      loadLogoForStock(enteredSymbol)
-        .then((logo) => {
-          this.setState({ logo: logo.url, error: null });
-        })
-        .catch(error => {
-          // If 404 found
-          if (error.response.status === 404) {
-            error = new Error(`The stock symbol '${enteredSymbol}' does not exist`);
-          }
-          this.setState({ error: error });
-          console.error("Error loading quote: ", error);
-        });
-  }
+
+    loadLogoForStock(enteredSymbol)
+      .then(logo => {
+        this.setState({ logo: logo.url, error: null });
+      })
+      .catch(error => {
+        // If 404 found
+        if (error.response.status === 404) {
+          error = new Error(
+            `The stock symbol '${enteredSymbol}' does not exist`
+          );
+        }
+        this.setState({ error: error });
+        console.error("Error loading quote: ", error);
+      });
+  };
 
   render() {
-    const { error, enteredSymbol, quote, logo } = this.state;
-
+    const { error, enteredSymbol, quote, logo, searchHistory } = this.state;
+    console.log(searchHistory);
     return (
       <div className="App">
         <h1 className="App-title">Wolf of React</h1>
-
         <input
           value={enteredSymbol}
           placeholder="Symbol e.g. NFLX"
           aria-label="Stock Symbol"
-          onChange={
-            this.onChangeEnteredSymbol
-          }
+          onChange={this.onChangeEnteredSymbol}
         />
-        <button
-          onClick={
-            this.loadQuote
-          }>
-          Submit
-        </button>
+        <button onClick={this.loadQuote}>Submit</button>
 
-        {!!error && <p>{error.message // conditional must be true to show
-          }</p>}
-        {!!logo && <Logo logo={logo}/>}
-        {!!quote ? <StockInfo {...quote}/> : <p>Loading...</p>}
+        {!!error && (
+          <p>
+            {
+              error.message // conditional must be true to show
+            }
+          </p>
+        )}
+        {!!logo && <Logo logo={logo} />}
+        {!!quote ? <StockInfo {...quote} /> : <p>Loading...</p>}
+        <ul>
+          {
+            searchHistory.map(item => (
+              <SearchItem key={item.call} item={item}/>
+            ))
+          }
+        </ul>
       </div>
     );
   }
