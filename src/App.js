@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
 import './App.css';
 import StockInfo from './components/StockInfo'
-import { loadQuoteForStock } from './api/iex'
+import Logo from "./components/Logo";
+import { loadQuoteForStock, loadLogoForStock } from './api/iex'
 
 loadQuoteForStock('nflx')
   .then((quote) => {
     console.log('Netflix: ', quote);
   })
 
+loadLogoForStock("nflx")
+  .then((logo) => {
+    console.log("Netflix: ", logo);
+});
+
 class App extends Component {
   state = {
     error: null,
     enteredSymbol: 'AAPL',
-    quote: null
+    quote: null,
+    logo: null
   };
 
   // The first time our component is rendered
@@ -48,10 +55,22 @@ class App extends Component {
         this.setState({ error: error });
         console.error("Error loading quote: ", error);
       });
+      loadLogoForStock(enteredSymbol)
+        .then((logo) => {
+          this.setState({ logo: logo.url, error: null });
+        })
+        .catch(error => {
+          // If 404 found
+          if (error.response.status === 404) {
+            error = new Error(`The stock symbol '${enteredSymbol}' does not exist`);
+          }
+          this.setState({ error: error });
+          console.error("Error loading quote: ", error);
+        });
   }
 
   render() {
-    const { error, enteredSymbol, quote } = this.state;
+    const { error, enteredSymbol, quote, logo } = this.state;
 
     return (
       <div className="App">
@@ -74,7 +93,8 @@ class App extends Component {
 
         {!!error && <p>{error.message // conditional must be true to show
           }</p>}
-        {!!quote ? <StockInfo {...quote} /> : <p>Loading...</p>}
+        {!!logo && <Logo logo={logo}/>}
+        {!!quote ? <StockInfo {...quote}/> : <p>Loading...</p>}
       </div>
     );
   }
