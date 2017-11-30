@@ -21,7 +21,7 @@ class App extends Component {
     enteredSymbol: "AAPL",
     quote: null,
     logo: null,
-    searchHistory: ["AAPL"]
+    searchHistory: []
   };
 
   // The first time our component is rendered
@@ -83,6 +83,7 @@ class App extends Component {
     return (
       <div className="App">
         <h1 className="App-title">Wolf of React</h1>
+        <h2>Quote</h2>
         <input
           value={enteredSymbol}
           placeholder="Symbol e.g. NFLX"
@@ -100,13 +101,14 @@ class App extends Component {
         )}
         {!!logo && <Logo logo={logo} />}
         {!!quote ? <StockInfo {...quote} /> : <p>Loading...</p>}
-        <ul>
-          {
+        <h2>Search History</h2>
+        <ol>
+          { !!searchHistory.length >= 1 &&
             searchHistory.map(item => (
               <SearchItem key={item.call} item={item}/>
             ))
           }
-        </ul>
+        </ol>
       </div>
     );
   }

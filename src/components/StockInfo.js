@@ -11,8 +11,8 @@ function StockInfo({
 }) {
   return (
     <div>
-      <h2>{ symbol } : { companyName }</h2>
-      <h3>{ latestPrice } ({ latestSource })</h3>
+      <h3>{ symbol } : { companyName }</h3>
+      <h4>{ latestPrice } ({ latestSource })</h4>
       <dl>
         <dt>Week 52 High</dt>
         <dd>{ week52High }</dd>
